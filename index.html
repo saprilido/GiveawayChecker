@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Giveaway Checker</title>
+<meta name="description" content="Validasi otomatis pemenang giveaway Instagram dari ribuan komentar — keyword, hashtag, jumlah tag, dan anti-duplikasi, tanpa cek satu-satu.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F7F8FA;
+    --panel:#FFFFFF;
+    --ink:#15171C;
+    --ink-soft:#68707E;
+    --ink-faint:#98A1AE;
+    --line:#E6E8EC;
+    --brand:#059669;
+    --brand-dark:#047857;
+    --brand-bg:#ECFDF5;
+    --amber:#D97706;
+    --amber-bg:#FFFBEB;
+    --red:#DC2626;
+    --red-bg:#FEF2F2;
+    --chip-bg:#F1F3F6;
+    --shadow: 0 1px 2px rgba(15,23,42,.04), 0 8px 24px -8px rgba(15,23,42,.10);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{ max-width:960px; margin:0 auto; padding:0 24px 80px; }
+
+  /* ---------- Header / Hero ---------- */
+  header.hero{
+    background:linear-gradient(180deg,#0F1115 0%,#181B22 100%);
+    padding:56px 24px 64px;
+    color:#fff;
+  }
+  .hero-inner{ max-width:960px; margin:0 auto; }
+  .badge{
+    display:inline-flex; align-items:center; gap:6px;
+    background:rgba(5,150,105,.18);
+    border:1px solid rgba(5,150,105,.4);
+    color:#6EE7B7;
+    font-size:12.5px; font-weight:600;
+    padding:5px 12px; border-radius:999px;
+    margin-bottom:18px;
+  }
+  h1.title{
+    font-size:38px; font-weight:800; letter-spacing:-0.02em;
+    margin:0 0 12px; color:#fff;
+  }
+  p.subtitle{
+    font-size:16px; color:#B6BCC7; max-width:60ch; margin:0;
+  }
+
+  /* ---------- Step cards ---------- */
+  .step{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:28px 28px 30px;
+    margin-top:24px;
+    box-shadow:var(--shadow);
+  }
+  .step-head{ display:flex; align-items:center; gap:14px; margin-bottom:6px; }
+  .step-num{
+    flex:none; width:34px; height:34px; border-radius:10px;
+    background:var(--ink); color:#fff; font-weight:700; font-size:15px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .step h2{ font-size:19px; margin:0; font-weight:700; letter-spacing:-0.01em; }
+  .step p.hint{ color:var(--ink-soft); font-size:13.5px; margin:10px 0 16px 48px; }
+
+  .notice-strong{
+    margin:14px 0 14px 48px;
+    background:var(--red-bg);
+    border:1px solid #F7C9C6;
+    border-radius:10px;
+    padding:13px 16px;
+    font-size:13px;
+    color:#8A2E27;
+  }
+  .notice-strong b{ font-weight:700; }
+
+  .field-block{ margin-left:48px; }
+
+  input[type=file]{
+    font-size:13.5px; color:var(--ink-soft);
+    padding:10px; border:1.5px dashed var(--line); border-radius:10px;
+    width:100%; background:#FAFBFC; cursor:pointer;
+  }
+  #fileStatus{ font-size:12.5px; color:var(--ink-soft); margin-top:8px; }
+
+  details.manual-toggle{ margin-top:16px; }
+  details.manual-toggle summary{
+    cursor:pointer; font-size:13px; color:var(--ink-soft); font-weight:600;
+    list-style:none;
+  }
+  details.manual-toggle summary::-webkit-details-marker{ display:none; }
+  details.manual-toggle summary::before{ content:"▸ "; color:var(--ink-faint); }
+  details.manual-toggle[open] summary::before{ content:"▾ "; }
+
+  textarea{
+    width:100%; min-height:150px;
+    border:1.5px solid var(--line); border-radius:10px;
+    padding:12px 14px; font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    font-size:12.5px; resize:vertical; background:#FAFBFC; color:var(--ink);
+    margin-top:10px;
+  }
+  textarea:focus, input:focus{ outline:2px solid var(--brand); outline-offset:1px; }
+
+  .link-btn{
+    background:none; border:none; color:var(--brand-dark); font-weight:600;
+    font-size:13px; cursor:pointer; padding:0; text-decoration:underline;
+    text-underline-offset:2px;
+  }
+
+  .row{ display:flex; gap:16px; flex-wrap:wrap; margin-top:6px; }
+  .field{ flex:1; min-width:200px; }
+  .field label{ display:block; font-size:12.5px; font-weight:600; color:var(--ink); margin-bottom:6px; }
+  .field .desc{ font-size:11.5px; color:var(--ink-faint); margin-top:4px; }
+  .field input[type=text], .field input[type=number]{
+    width:100%; padding:9px 12px; border:1.5px solid var(--line); border-radius:9px;
+    font-size:13.5px; background:#FAFBFC; color:var(--ink); font-family:inherit;
+  }
+  .checkline{
+    display:flex; align-items:flex-start; gap:9px; font-size:13px; color:var(--ink);
+    margin-top:4px; padding:10px 12px; background:#FAFBFC; border-radius:9px; border:1px solid var(--line);
+  }
+  .checkline input{ margin-top:2px; }
+  .checkline .sub{ display:block; font-size:11.5px; color:var(--ink-faint); margin-top:2px; }
+
+  fieldset.adv{
+    border:1.5px dashed var(--line); border-radius:12px; padding:18px 18px 6px;
+    margin-top:22px;
+  }
+  fieldset.adv legend{
+    font-size:12px; font-weight:700; color:var(--ink-soft); padding:0 8px;
+    text-transform:uppercase; letter-spacing:.04em;
+  }
+
+  button{
+    font-family:inherit; cursor:pointer; border:none;
+    border-radius:10px; font-weight:600; font-size:14px;
+  }
+  button.primary{
+    background:var(--ink); color:#fff; padding:13px 26px; margin-top:22px;
+    box-shadow:0 4px 14px -4px rgba(0,0,0,.35);
+  }
+  button.primary:hover{ background:#000; }
+  button.secondary{
+    background:#fff; color:var(--ink); border:1.5px solid var(--line); padding:9px 18px;
+  }
+  button.secondary:hover{ background:#F3F4F6; }
+  button.secondary.active{
+    background:var(--ink); color:#fff; border-color:var(--ink);
+  }
+  button.ghost{
+    background:transparent; color:var(--brand-dark); padding:9px 14px;
+    border:1.5px solid var(--brand); 
+  }
+  button.ghost:hover{ background:var(--brand-bg); }
+
+  /* ---------- Results ---------- */
+  #resultsArea{ display:none; }
+  .stats-grid{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:22px 0 6px;
+  }
+  .stat{
+    background:var(--panel); border:1.5px solid var(--line); border-radius:12px;
+    padding:16px; cursor:pointer; transition:.15s;
+  }
+  .stat:hover{ border-color:var(--ink-faint); }
+  .stat.active{ border-color:var(--ink); box-shadow:0 0 0 1px var(--ink); }
+  .stat .n{ font-size:26px; font-weight:800; letter-spacing:-0.02em; }
+  .stat .l{ font-size:11.5px; color:var(--ink-soft); margin-top:3px; font-weight:600; }
+  .stat.valid .n{ color:var(--brand-dark); }
+  .stat.invalid .n{ color:var(--red); }
+
+  .reason-chips{ display:flex; flex-wrap:wrap; gap:8px; margin:4px 0 22px; }
+  .chip{
+    background:var(--chip-bg); border:1px solid var(--line); border-radius:999px;
+    padding:6px 13px; font-size:12px; font-weight:600; color:var(--ink-soft); cursor:pointer;
+  }
+  .chip:hover{ background:#E9ECF1; }
+  .chip.active{ background:var(--red-bg); border-color:#F3B4AF; color:var(--red); }
+
+  .segmented{
+    display:inline-flex; background:var(--chip-bg); border-radius:11px; padding:4px; gap:2px;
+  }
+  .segmented button{
+    padding:9px 18px; border-radius:8px; background:transparent; color:var(--ink-soft); font-size:13.5px;
+  }
+  .segmented button.active{ background:#fff; color:var(--ink); box-shadow:0 1px 3px rgba(0,0,0,.12); }
+
+  .actions-row{ display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px; margin-top:26px; }
+  .winner-controls{ display:flex; align-items:center; gap:10px; }
+  .winner-controls input{ width:70px; padding:9px; border:1.5px solid var(--line); border-radius:9px; font-size:13.5px; }
+  #winnerBox{ margin-top:16px; }
+  .winner-card{
+    background:var(--amber-bg); border:1.5px solid #F3D9A8; border-radius:12px; padding:18px 20px;
+  }
+  .winner-card h3{ margin:0 0 10px; font-size:13.5px; color:#8A5A0B; font-weight:700; }
+  .winner-name{ font-size:17px; font-weight:700; padding:3px 0; }
+  .winner-name a{ color:var(--ink); text-decoration:none; }
+  .winner-name a:hover{ text-decoration:underline; }
+
+  table{ width:100%; border-collapse:collapse; font-size:13px; margin-top:16px; }
+  thead th{
+    text-align:left; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.03em;
+    color:var(--ink-soft); padding:10px 12px; border-bottom:2px solid var(--line);
+  }
+  tbody td{ padding:11px 12px; border-bottom:1px solid var(--line); vertical-align:top; }
+  tbody tr:hover{ background:#FAFBFC; }
+  td a{ color:var(--brand-dark); font-weight:600; text-decoration:none; }
+  td a:hover{ text-decoration:underline; }
+  .comment-count-note{ font-size:11px; color:var(--ink-faint); margin-top:2px; }
+  .badge-status{
+    display:inline-block; padding:3px 10px; border-radius:999px; font-size:11px; font-weight:700;
+  }
+  .badge-status.ok{ background:var(--brand-bg); color:var(--brand-dark); }
+  .badge-status.bad{ background:var(--red-bg); color:var(--red); }
+  .table-wrap{ max-height:520px; overflow:auto; border:1px solid var(--line); border-radius:12px; }
+  .table-wrap table{ margin-top:0; }
+  .table-wrap thead{ position:sticky; top:0; background:#fff; z-index:1; }
+
+  /* ---------- Modal ---------- */
+  .modal-backdrop{
+    display:none; position:fixed; inset:0; background:rgba(15,17,20,.55);
+    backdrop-filter:blur(3px); z-index:50; align-items:center; justify-content:center; padding:20px;
+  }
+  .modal-backdrop.show{ display:flex; }
+  .modal-card{
+    background:#fff; border-radius:16px; max-width:520px; width:100%;
+    padding:28px 28px 24px; box-shadow:0 24px 60px -12px rgba(0,0,0,.35);
+    max-height:80vh; display:flex; flex-direction:column;
+  }
+  .modal-card h3{ margin:0 0 12px; font-size:17px; font-weight:700; }
+  .modal-body{ font-size:13.5px; color:var(--ink-soft); overflow-y:auto; white-space:pre-wrap; line-height:1.6; }
+  .modal-actions{ display:flex; justify-content:flex-end; gap:10px; margin-top:20px; }
+
+  footer.site-footer{
+    text-align:center; padding:34px 24px 10px; color:var(--ink-faint); font-size:12px;
+  }
+  footer.site-footer a{ color:var(--ink-soft); text-decoration:underline; }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <span class="badge">● Client-side · Tidak ada data terkirim ke server</span>
+    <h1 class="title">Giveaway Checker</h1>
+    <p class="subtitle">Validasi otomatis pemenang giveaway Instagram dari ribuan komentar — keyword, hashtag, jumlah tag, dan anti-duplikasi, tanpa perlu cek satu-satu.</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- STEP 1 -->
+  <div class="step">
+    <div class="step-head">
+      <div class="step-num">1</div>
+      <h2>Upload File Komentar</h2>
+    </div>
+    <p class="hint">Upload hasil "Save As &gt; Webpage, Complete" dari halaman postingan Instagram (.html), setelah komentar di-scroll penuh sebelum disimpan.</p>
+
+    <div class="field-block">
+      <input type="file" id="fileInput" accept=".html,.htm,.txt,.csv">
+      <div id="fileStatus"></div>
+
+      <div class="notice-strong">
+        <b>Tool ini tidak terafiliasi resmi dengan Instagram/Meta.</b> Segala bentuk scraping data atau penarikan data yang tidak sesuai Ketentuan Meta sepenuhnya menjadi tanggung jawab pengguna.
+      </div>
+
+      <p class="hint" style="margin-left:0;">
+        Format .txt dan .csv juga didukung.
+        <button class="link-btn" onclick="openGuideModal()">Baca cara pakai</button>
+      </p>
+
+      <details class="manual-toggle">
+        <summary>atau tempel manual (opsional, kalau tidak ada file HTML)</summary>
+        <p class="hint" style="margin-left:0;">Satu baris satu komentar, format: <code>username | isi komentar</code>.</p>
+        <textarea id="rawInput" placeholder="user.satu | Ikutan GiveawayContoh #GiveawayContoh @teman1 @teman2
+user.dua | Semoga menang @teman3 @teman4 #GiveawayContoh"></textarea>
+      </details>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step">
+    <div class="step-head">
+      <div class="step-num">2</div>
+      <h2>Atur Kriteria Giveaway</h2>
+    </div>
+    <p class="hint">Sesuaikan dengan ketentuan giveaway kamu. Semua kriteria di bawah bersifat opsional kecuali disebut wajib.</p>
+
+    <div class="field-block">
+      <div class="row">
+        <div class="field">
+          <label>Keyword wajib</label>
+          <input type="text" id="keyword" placeholder="Contoh: Giveaway Agustus 2027">
+        </div>
+        <div class="field">
+          <label>Minimal jumlah tag teman</label>
+          <input type="number" id="minTags" value="2" min="0">
+        </div>
+      </div>
+
+      <div class="checkline">
+        <input type="checkbox" id="strict">
+        <label for="strict">Cocokkan keyword persis (huruf besar/kecil &amp; tanda baca harus sama)</label>
+      </div>
+
+      <fieldset class="adv">
+        <legend>Kriteria Tambahan (Standar Giveaway)</legend>
+
+        <div class="row">
+          <div class="field">
+            <label>Hashtag wajib</label>
+            <input type="text" id="hashtag" placeholder="Contoh: #GiveawayContoh">
+            <div class="desc">Kosongkan jika giveaway tidak mewajibkan hashtag.</div>
+          </div>
+          <div class="field">
+            <label>Minimal panjang komentar (karakter)</label>
+            <input type="number" id="minLength" value="0" min="0">
+            <div class="desc">0 = tidak diberlakukan. Menyaring komentar asal-asalan/kosong.</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label>Blacklist akun (pisahkan dengan koma)</label>
+            <input type="text" id="blacklist" placeholder="akun.panitia, akun.staff">
+            <div class="desc">Akun ini otomatis gugur meski memenuhi syarat lain.</div>
+          </div>
+          <div class="field">
+            <label>Kata terlarang / spam (pisahkan dengan koma)</label>
+            <input type="text" id="spamwords" placeholder="follow4follow, jualaninipromo">
+            <div class="desc">Komentar yang mengandung salah satu kata ini otomatis gugur.</div>
+          </div>
+        </div>
+
+        <div class="checkline">
+          <input type="checkbox" id="oneEntry" checked>
+          <label for="oneEntry">Satu akun hanya dihitung 1 entri
+            <span class="sub">Komentar ganda dari akun yang sama digabung; jika giveaway kamu justru mengizinkan banyak entri per komentar, matikan opsi ini.</span>
+          </label>
+        </div>
+        <div class="checkline">
+          <input type="checkbox" id="selfTag" checked>
+          <label for="selfTag">Abaikan tag ke diri sendiri
+            <span class="sub">Tag ke akun milik si komentator sendiri tidak dihitung sebagai tag yang sah.</span>
+          </label>
+        </div>
+      </fieldset>
+
+      <button class="primary" onclick="confirmProcess()">Proses &amp; Validasi Komentar</button>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="resultsArea">
+    <div class="step">
+      <div class="step-head">
+        <div class="step-num">3</div>
+        <h2>Daftar Hasil Pemeriksaan</h2>
+      </div>
+
+      <div class="field-block">
+        <div class="stats-grid" id="statsRow"></div>
+        <div class="reason-chips" id="reasonChips"></div>
+
+        <div class="actions-row">
+          <div class="segmented" id="resultToggle">
+            <button id="btnShowValid" class="active" onclick="applyFilter('valid')">Tampilkan yang Lolos</button>
+            <button id="btnShowAll" onclick="applyFilter('all')">Tampilkan Semua</button>
+          </div>
+          <button class="secondary" onclick="exportCSV()">Unduh CSV</button>
+        </div>
+
+        <div class="actions-row" style="margin-top:14px;">
+          <div class="winner-controls">
+            <span style="font-size:13px; color:var(--ink-soft); font-weight:600;">Jumlah pemenang</span>
+            <input type="number" id="winnerCount" value="1" min="1">
+            <button class="ghost" onclick="pickWinner()">Acak Pemenang</button>
+          </div>
+        </div>
+        <div id="winnerBox"></div>
+
+        <div class="table-wrap" style="margin-top:22px;">
+          <table>
+            <thead id="resultsHead"></thead>
+            <tbody id="resultsBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer class="site-footer">
+  Made by <a href="https://apink.web.id" target="_blank" rel="noopener">apink.web.id</a> with Claude &nbsp;|&nbsp; © copyright 2026 &nbsp;|&nbsp; versi 1.2
+</footer>
+
+<!-- Generic Modal -->
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal-card">
+    <h3 id="modalTitle">Judul</h3>
+    <div class="modal-body" id="modalBody">Isi</div>
+    <div class="modal-actions" id="modalActions"></div>
+  </div>
+</div>
+
+<script>
+// ===================== MODAL HELPERS =====================
+function showModal(title, bodyHtml, actionsHtml){
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalBody').innerHTML = bodyHtml;
+  document.getElementById('modalActions').innerHTML = actionsHtml;
+  document.getElementById('modalBackdrop').classList.add('show');
+}
+function closeModal(){
+  document.getElementById('modalBackdrop').classList.remove('show');
+}
+
+function openGuideModal(){
+  showModal('Cara Pakai', 'Memuat panduan…', '<button class="secondary" onclick="closeModal()">Tutup</button>');
+  fetch('./cara_pakai.txt')
+    .then(r => { if(!r.ok) throw new Error(); return r.text(); })
+    .then(text => { document.getElementById('modalBody').textContent = text; })
+    .catch(() => {
+      document.getElementById('modalBody').textContent =
+        'Tidak bisa memuat cara_pakai.txt.\n\nIni biasanya terjadi kalau file dibuka langsung dari komputer (file://) alih-alih lewat server (GitHub Pages / local server). Pastikan file cara_pakai.txt berada di folder yang sama dengan index.html.';
+    });
+}
+
+function confirmProcess(){
+  showModal(
+    'Persetujuan Penggunaan',
+    'Dengan klik OK, Anda setuju bahwa penggunaan tool ini — termasuk cara Anda memperoleh data komentar — mengikuti dan tunduk pada Ketentuan resmi dari Meta/Instagram. Tool ini tidak terafiliasi resmi dengan Instagram.',
+    '<button class="secondary" onclick="closeModal()">Batal</button><button class="primary" style="margin-top:0;" onclick="closeModal(); process();">OK, Lanjutkan</button>'
+  );
+}
+
+// ===================== STATE =====================
+let validEntries = [];
+let uploadedFileText = null;
+let uploadedFileIsHTML = false;
+let lastRawRows = [];
+let lastMergedResults = [];
+let currentFilterMode = 'valid';
+
+document.getElementById('fileInput').addEventListener('change', function(e){
+  const file = e.target.files[0];
+  const statusEl = document.getElementById('fileStatus');
+  if(!file){ uploadedFileText = null; statusEl.textContent = ''; return; }
+  statusEl.textContent = 'Membaca file...';
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    uploadedFileText = ev.target.result;
+    uploadedFileIsHTML = /<html[\s>]|<li[\s>]/i.test(uploadedFileText) || /\.html?$/i.test(file.name);
+    statusEl.textContent = `File dimuat: ${file.name} (${(file.size/1024/1024).toFixed(1)} MB).`;
+  };
+  reader.onerror = function(){ statusEl.textContent = 'Gagal membaca file, coba upload ulang.'; };
+  reader.readAsText(file);
+});
+
+// ===================== EXTRACTION =====================
+function extractFromHTML(htmlText){
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(htmlText, 'text/html');
+  const lis = Array.from(doc.querySelectorAll('li'));
+  const rows = [];
+  lis.forEach(li => {
+    const h3 = li.querySelector('h3');
+    if(!h3) return;
+    if(h3.closest('li') !== li) return;
+    let username = null;
+    const userLink = h3.querySelector('a[href*="instagram.com/"]');
+    if(userLink) username = userLink.textContent.trim();
+    if(!username){
+      const img = li.querySelector("img[alt$=\"'s profile picture\"]");
+      if(img) username = img.alt.replace(/'s profile picture$/,'').trim();
+    }
+    if(!username) return;
+    let textEl = null;
+    let sib = h3.nextElementSibling;
+    while(sib && !textEl){
+      textEl = sib.querySelector('span[dir="auto"]');
+      if(!textEl && sib.matches && sib.matches('span[dir="auto"]')) textEl = sib;
+      sib = sib.nextElementSibling;
+    }
+    if(!textEl) return;
+    const clone = textEl.cloneNode(true);
+    clone.querySelectorAll('br').forEach(br => br.replaceWith(' '));
+    const text = clone.textContent.replace(/\s+/g,' ').trim();
+    if(!text) return;
+    rows.push({ username, comment: text });
+  });
+  return rows;
+}
+
+function extractFromPlainText(raw){
+  const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+  return lines.map(line => {
+    const sepIdx = line.indexOf('|');
+    if(sepIdx === -1) return { username: '(tidak diketahui)', comment: line };
+    return { username: line.slice(0, sepIdx).trim(), comment: line.slice(sepIdx + 1).trim() };
+  });
+}
+
+// ===================== PROCESS =====================
+function process(){
+  const keyword = document.getElementById('keyword').value.trim();
+  const minTags = parseInt(document.getElementById('minTags').value || '0', 10);
+  const strict = document.getElementById('strict').checked;
+  const hashtag = document.getElementById('hashtag').value.trim();
+  const minLength = parseInt(document.getElementById('minLength').value || '0', 10);
+  const blacklist = document.getElementById('blacklist').value.split(',').map(s => s.trim().toLowerCase().replace(/^@/,'')).filter(Boolean);
+  const spamWords = document.getElementById('spamwords').value.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+  const oneEntry = document.getElementById('oneEntry').checked;
+  const preventSelfTag = document.getElementById('selfTag').checked;
+  const manualRaw = document.getElementById('rawInput').value.trim();
+
+  let parsed = [];
+  if(uploadedFileText){
+    parsed = uploadedFileIsHTML ? extractFromHTML(uploadedFileText) : extractFromPlainText(uploadedFileText);
+    if(uploadedFileIsHTML && parsed.length === 0){
+      alert('Tidak ada komentar yang berhasil terbaca dari file HTML ini. Coba pakai opsi tempel manual, atau pastikan komentar sudah di-scroll penuh sebelum "Save As".');
+      return;
+    }
+  } else if(manualRaw){
+    parsed = extractFromPlainText(manualRaw);
+  } else {
+    alert('Upload file komentar dulu, atau isi tempel manual.');
+    return;
+  }
+
+  lastRawRows = parsed;
+
+  const grouped = new Map();
+  parsed.forEach(entry => {
+    const key = entry.username.toLowerCase();
+    if(!grouped.has(key)) grouped.set(key, { username: entry.username, comments: [] });
+    grouped.get(key).comments.push(entry.comment);
+  });
+
+  const normalize = s => s.toLowerCase().replace(/[^a-z0-9]/g,'');
+
+  const results = [];
+  grouped.forEach(group => {
+    const combinedText = group.comments.join(' | ');
+    const rawTagMatches = combinedText.match(/@[\w.]{1,30}/g) || [];
+    let uniqueTags = [...new Set(rawTagMatches.map(t => t.toLowerCase()))];
+    if(preventSelfTag){
+      const selfHandle = '@' + group.username.toLowerCase().replace(/^@/,'');
+      uniqueTags = uniqueTags.filter(t => t !== selfHandle);
+    }
+    const tagCount = uniqueTags.length;
+    const tagOk = tagCount >= minTags;
+
+    let keywordFound = true;
+    if(keyword){
+      keywordFound = strict
+        ? group.comments.some(c => c.includes(keyword))
+        : group.comments.some(c => normalize(c).includes(normalize(keyword)));
+    }
+
+    let hashtagOk = true;
+    if(hashtag){
+      hashtagOk = group.comments.some(c => normalize(c).includes(normalize(hashtag)));
+    }
+
+    const isDuplicated = group.comments.length > 1;
+    const duplicateOk = !oneEntry || !isDuplicated;
+
+    const isBlacklisted = blacklist.includes(group.username.toLowerCase().replace(/^@/,''));
+
+    const lowerText = combinedText.toLowerCase();
+    const hasSpamWord = spamWords.length > 0 && spamWords.some(w => lowerText.includes(w));
+
+    const cleanLength = combinedText.replace(/\s+/g,' ').trim().length;
+    const lengthOk = minLength <= 0 || cleanLength >= minLength;
+
+    const valid = keywordFound && tagOk && hashtagOk && duplicateOk && !isBlacklisted && !hasSpamWord && lengthOk;
+
+    const reasons = [];
+    if(!keywordFound) reasons.push({ code:'keyword', label:'Keyword tidak sesuai' });
+    if(!tagOk) reasons.push({ code:'tag', label:`Tag kurang (${tagCount}/${minTags})` });
+    if(hashtag && !hashtagOk) reasons.push({ code:'hashtag', label:'Hashtag wajib tidak ditemukan' });
+    if(oneEntry && isDuplicated) reasons.push({ code:'duplicate', label:'Berkomentar lebih dari sekali' });
+    if(isBlacklisted) reasons.push({ code:'blacklist', label:'Akun ada di blacklist' });
+    if(hasSpamWord) reasons.push({ code:'spam', label:'Mengandung kata terlarang' });
+    if(minLength > 0 && !lengthOk) reasons.push({ code:'length', label:`Komentar terlalu pendek (<${minLength} karakter)` });
+
+    results.push({
+      username: group.username,
+      comments: group.comments,
+      comment: combinedText,
+      commentCount: group.comments.length,
+      isDuplicated,
+      tags: uniqueTags,
+      tagCount,
+      valid,
+      reasons
+    });
+  });
+
+  lastMergedResults = results;
+  validEntries = results.filter(r => r.valid);
+
+  document.getElementById('resultsArea').style.display = 'block';
+  document.getElementById('winnerBox').innerHTML = '';
+  applyFilter('valid');
+  document.getElementById('resultsArea').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+// ===================== STATS & FILTER =====================
+function computeStats(){
+  const raw = lastRawRows, merged = lastMergedResults;
+  const valid = merged.filter(r => r.valid).length;
+  const invalid = merged.length - valid;
+  const reasonCounts = {};
+  merged.forEach(r => { if(!r.valid) r.reasons.forEach(rs => { reasonCounts[rs.code] = (reasonCounts[rs.code]||0) + 1; }); });
+  return { totalRaw: raw.length, totalUnique: merged.length, valid, invalid, reasonCounts };
+}
+
+const REASON_LABELS = {
+  keyword:'Keyword tidak sesuai', tag:'Tag kurang', hashtag:'Hashtag tidak ada',
+  duplicate:'Berkomentar berulang', blacklist:'Blacklist', spam:'Kata terlarang', length:'Komentar terlalu pendek'
+};
+
+function renderStatsCards(){
+  const s = computeStats();
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat" data-mode="raw" onclick="applyFilter('raw')"><div class="n">${s.totalRaw}</div><div class="l">Total Komentar Terbaca</div></div>
+    <div class="stat" data-mode="all" onclick="applyFilter('all')"><div class="n">${s.totalUnique}</div><div class="l">Akun Unik (Setelah Merge)</div></div>
+    <div class="stat valid" data-mode="valid" onclick="applyFilter('valid')"><div class="n">${s.valid}</div><div class="l">Lolos Semua Kriteria</div></div>
+    <div class="stat invalid" data-mode="invalid" onclick="applyFilter('invalid')"><div class="n">${s.invalid}</div><div class="l">Gugur</div></div>
+  `;
+  const chipsEl = document.getElementById('reasonChips');
+  const codes = Object.keys(s.reasonCounts);
+  if(codes.length === 0){ chipsEl.innerHTML = ''; }
+  else {
+    chipsEl.innerHTML = codes.map(code =>
+      `<span class="chip" data-mode="reason:${code}" onclick="applyFilter('reason:${code}')">${REASON_LABELS[code]||code}: ${s.reasonCounts[code]}</span>`
+    ).join('');
+  }
+  document.querySelectorAll('.stat, .chip').forEach(el => {
+    if(el.getAttribute('data-mode') === currentFilterMode) el.classList.add('active');
+  });
+  document.getElementById('btnShowValid').classList.toggle('active', currentFilterMode === 'valid');
+  document.getElementById('btnShowAll').classList.toggle('active', currentFilterMode === 'all');
+}
+
+function applyFilter(mode){
+  currentFilterMode = mode;
+  renderStatsCards();
+
+  if(mode === 'raw'){ renderRawTable(lastRawRows); return; }
+
+  const merged = lastMergedResults;
+  let filtered;
+  if(mode === 'valid') filtered = merged.filter(r => r.valid);
+  else if(mode === 'invalid') filtered = merged.filter(r => !r.valid);
+  else if(mode.startsWith('reason:')){
+    const code = mode.split(':')[1];
+    filtered = merged.filter(r => !r.valid && r.reasons.some(rs => rs.code === code));
+  } else filtered = merged;
+
+  renderTable(filtered);
+}
+
+function usernameLink(username){
+  const clean = username.replace(/^@/, '');
+  return `<a href="https://instagram.com/${encodeURIComponent(clean)}" target="_blank" rel="noopener">@${escapeHtml(clean)}</a>`;
+}
+function escapeHtml(str){ const div = document.createElement('div'); div.textContent = str; return div.innerHTML; }
+
+function renderRawTable(rows){
+  document.getElementById('resultsHead').innerHTML = `<tr><th>Username</th><th>Komentar (mentah, sebelum digabung)</th></tr>`;
+  document.getElementById('resultsBody').innerHTML = rows.map(r => `
+    <tr><td>${usernameLink(r.username)}</td><td>${escapeHtml(r.comment)}</td></tr>
+  `).join('');
+}
+
+function renderTable(results){
+  document.getElementById('resultsHead').innerHTML = `<tr><th>Username</th><th>Komentar</th><th>Tag</th><th>Status</th><th>Keterangan</th></tr>`;
+  document.getElementById('resultsBody').innerHTML = results.map(r => `
+    <tr>
+      <td>${usernameLink(r.username)}${r.commentCount > 1 ? `<div class="comment-count-note">${r.commentCount} komentar digabung</div>` : ''}</td>
+      <td>${escapeHtml(r.comment)}</td>
+      <td>${r.tags.map(usernameLink).join('<br>') || '—'}</td>
+      <td><span class="badge-status ${r.valid ? 'ok' : 'bad'}">${r.valid ? 'Lolos' : 'Belum lolos'}</span></td>
+      <td style="font-size:12px; color:var(--ink-soft);">${r.reasons.map(x=>x.label).join(', ') || '—'}</td>
+    </tr>
+  `).join('');
+}
+
+// ===================== WINNER & EXPORT =====================
+function pickWinner(){
+  if(validEntries.length === 0){
+    document.getElementById('winnerBox').innerHTML = '<p style="font-size:13px;color:var(--ink-soft);">Belum ada peserta yang lolos untuk diundi.</p>';
+    return;
+  }
+  const count = Math.min(parseInt(document.getElementById('winnerCount').value || '1', 10), validEntries.length);
+  const pool = [...validEntries];
+  const winners = [];
+  for(let i = 0; i < count; i++){
+    const idx = Math.floor(Math.random() * pool.length);
+    winners.push(pool.splice(idx, 1)[0]);
+  }
+  document.getElementById('winnerBox').innerHTML = `
+    <div class="winner-card">
+      <h3>HASIL UNDIAN SEMENTARA — verifikasi manual (follow, share, akun publik) sebelum diumumkan</h3>
+      ${winners.map(w => `<div class="winner-name">${usernameLink(w.username)}</div>`).join('')}
+    </div>
+  `;
+}
+
+function exportCSV(){
+  if(validEntries.length === 0){ alert('Belum ada data lolos untuk diunduh.'); return; }
+  const header = 'username,komentar,jumlah_tag,tag_list\n';
+  const rows = validEntries.map(r =>
+    `"${r.username.replace(/"/g,'""')}","${r.comment.replace(/"/g,'""')}",${r.tagCount},"${r.tags.join(' ').replace(/"/g,'""')}"`
+  ).join('\n');
+  const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'giveaway-checker-hasil.csv'; a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>

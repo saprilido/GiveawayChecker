@@ -1,0 +1,28 @@
+CARA PAKAI — GIVEAWAY CHECKER
+(placeholder — silakan diisi/diganti dengan teks final)
+
+1. Siapkan data komentar
+   - Buka postingan giveaway di Instagram lewat browser desktop
+   - Scroll komentar sampai benar-benar habis (penting, supaya semua komentar ikut ter-load)
+   - Klik kanan > Save As > pilih "Webpage, Complete"
+
+2. Upload file
+   - Buka Giveaway Checker
+   - Upload file .html hasil save tadi (atau .txt/.csv kalau datanya sudah dalam format username | komentar)
+
+3. Atur kriteria
+   - Isi keyword wajib, jumlah tag minimal, dan kriteria tambahan sesuai ketentuan giveaway kamu
+   - Kosongkan kolom yang tidak relevan
+
+4. Proses & lihat hasil
+   - Klik "Proses & Validasi Komentar"
+   - Setujui ketentuan penggunaan yang muncul
+   - Lihat daftar akun yang lolos, atau klik "Tampilkan Semua" untuk melihat seluruh data
+
+5. Undi pemenang / unduh hasil
+   - Klik "Acak Pemenang" untuk mengundi dari daftar yang lolos
+   - Atau unduh CSV untuk verifikasi manual lebih lanjut
+
+Catatan:
+- Tool ini berjalan sepenuhnya di browser kamu — tidak ada data yang dikirim ke server mana pun.
+- Follow, share, dan status akun publik/private tetap perlu dicek manual.
